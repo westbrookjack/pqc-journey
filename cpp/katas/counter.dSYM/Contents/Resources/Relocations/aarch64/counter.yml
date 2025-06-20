@@ -1,0 +1,5 @@
+---
+triple:          'arm64-apple-darwin'
+binary-path:     '/Users/jackwestbrook/pqc-journey/cpp/katas/counter'
+relocations:     []
+...
