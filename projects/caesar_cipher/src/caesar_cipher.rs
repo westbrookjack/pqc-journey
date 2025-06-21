@@ -5,10 +5,10 @@ pub struct CaesarCipher {
 impl CaesarCipher {
     fn encrypt_char(input: char, shift: u8) -> char {
         let c = input as u8;
-        if 65 <= c && c <= 90 {
-            ((c - 65 + shift) % 26 + 65) as char
-        } else if 97 <= c && c <= 122 {
-            ((c - 97 + shift) % 26 + 97) as char
+        if b'A' <= c && c <= b'Z' {
+            ((c - b'A' + shift) % 26 + b'A') as char
+        } else if b'a' <= c && c <= b'z' {
+            ((c - b'a' + shift) % 26 + b'a') as char
         } else {
             input
         }
@@ -16,10 +16,10 @@ impl CaesarCipher {
 
     fn decrypt_char(input: char, shift: u8) -> char {
         let c = input as u8;
-        if 65 <= c && c <= 90 {
-            ((26 + c - 65 - shift) % 26 + 65) as char
-        } else if 97 <= c && c <= 122 {
-            ((26 + c - 97 - shift) % 26 + 97) as char
+        if b'A' <= c && c <= b'Z' {
+            ((26 + c - b'A' - shift) % 26 + b'A') as char
+        } else if b'a' <= c && c <= b'z' {
+            ((26 + c - b'a' - shift) % 26 + b'a') as char
         } else {
             input
         }
