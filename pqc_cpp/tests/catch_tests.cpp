@@ -4,7 +4,8 @@
 #define CATCH_CONFIG_MAIN
 #include "catch.hpp"
 
-#include "singly_linked_list.hpp"
+#include "../data_structures/singly_linked_list.hpp"
+
 
 
 TEST_CASE("List starts empty") {
