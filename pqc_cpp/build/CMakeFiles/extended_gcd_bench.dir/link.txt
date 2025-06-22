@@ -1,0 +1,1 @@
+/usr/bin/c++  -arch arm64 -Wl,-search_paths_first -Wl,-headerpad_max_install_names CMakeFiles/extended_gcd_bench.dir/benches/extended_gcd_bench.cpp.o CMakeFiles/extended_gcd_bench.dir/number_theory/extended_gcd.cpp.o -o extended_gcd_bench  /usr/local/lib/libbenchmark.a

@@ -2,7 +2,6 @@ pub fn modular_exponentiation(a: u64, b: u64, m: u64) -> u64 {
     // Exponentiation by squaring
     let mut alpha: u128 = a as u128;
     let mu: u128 = m as u128;
-    //let beta: u128 = b as u128;
     alpha%=mu;
     let mut result:u128 = 1;
 
@@ -18,7 +17,7 @@ pub fn modular_exponentiation(a: u64, b: u64, m: u64) -> u64 {
                 result = (result * alpha) % mu;
             }
         
-        alpha = ( alpha*alpha )% mu;
+            alpha = ( alpha*alpha )% mu;
         
         }
         ((result*alpha)%mu).try_into().unwrap()

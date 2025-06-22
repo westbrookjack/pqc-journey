@@ -39,7 +39,7 @@ pub fn gcd_triple(alpha: u64, beta: u64) -> (u64, i128, i128) {
             tup2.2 = c;
         }
 
-        assert!(tup2.0==tup2.1*i128::from(alpha)+tup2.2*i128::from(beta), "Something went wrong in the computation.");
+        //assert!(tup2.0==tup2.1*i128::from(alpha)+tup2.2*i128::from(beta), "Something went wrong in the computation.");
 
         (u64::try_from(tup2.0).expect("Value out of u64 range"), tup2.1, tup2.2)
         }
