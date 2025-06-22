@@ -1,6 +1,6 @@
 // tests/cipher.rs
 
-use pqc::ciphers::caesar::CaesarCipher;
+use pqc_rust::ciphers::caesar::CaesarCipher;
 
 
 #[test]

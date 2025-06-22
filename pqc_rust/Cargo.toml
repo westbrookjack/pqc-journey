@@ -1,14 +1,21 @@
 [package]
 name = "pqc_rust"
 version = "0.1.0"
-edition = "2024"
-
-
-[lib]
-name = "pqc"
-path = "src/lib.rs"
+edition = "2021"
 
 [dependencies]
+# Add your actual dependencies here if any
 
 [dev-dependencies]
 criterion = "0.5"
+
+[profile.bench]
+debug = true
+
+[[bench]]
+name = "extended_gcd"
+harness = false
+
+[[bench]]
+name = "mod_exp"
+harness = false

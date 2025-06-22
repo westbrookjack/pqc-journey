@@ -1,4 +1,4 @@
-use pqc::number_theory::{ mod_exp::modular_exponentiation, extended_gcd::gcd_triple };
+use pqc_rust::number_theory::{ mod_exp::modular_exponentiation, extended_gcd::gcd_triple };
 
 fn main() {
     let base = 2;
