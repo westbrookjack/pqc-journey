@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-# Add your actual dependencies here if any
+rand = "0.8"
 
 [dev-dependencies]
 criterion = "0.5"
