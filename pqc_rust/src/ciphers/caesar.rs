@@ -3,7 +3,7 @@ use rand::Rng;
 //This struct will have a private key of type u8 as it's only value. One can construct an instance with_key by setting
 // the key to a u8 value, or with the default key 3 by the without_key function.
 pub struct CaesarCipher {
-    key: u8,
+    key: u8
 }
 
 
@@ -62,10 +62,3 @@ impl CaesarCipher {
     }
 
 }
-
-// #[cfg(test)]
-// mod tests {
-//     use super::*;
-
-    
-// }
