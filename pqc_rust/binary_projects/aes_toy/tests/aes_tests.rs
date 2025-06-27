@@ -1,53 +1,50 @@
 use aes_toy::{AesState, key_schedule};
 
-#[cfg(test)]
-mod tests {
-    use super::*;
+// 128-bit AES test key
+const AES_KEY: [u8; 16] = [
+    0x2b, 0x7e, 0x15, 0x16,
+    0x28, 0xae, 0xd2, 0xa6,
+    0xab, 0xf7, 0x15, 0x88,
+    0x09, 0xcf, 0x4f, 0x3c,
+];
 
-    #[test]
-fn test_encrypt_decrypt_cycle() {
-    let plaintext: [u8; 16] = [0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77,
-                               0x88, 0x99, 0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff];
-    let key: [u8; 16] = [0x0f; 16]; // constant key
+// Plaintext block
+const PLAINTEXT: [u8; 16] = [
+    0x32, 0x43, 0xf6, 0xa8,
+    0x88, 0x5a, 0x30, 0x8d,
+    0x31, 0x31, 0x98, 0xa2,
+    0xe0, 0x37, 0x07, 0x34,
+];
 
-    let round_keys = key_schedule(&key, 10);
+// Expected ciphertext (AES-128 ECB, 1 block)
+const CIPHERTEXT: [u8; 16] = [
+    0x39, 0x25, 0x84, 0x1d,
+    0x02, 0xdc, 0x09, 0xfb,
+    0xdc, 0x11, 0x85, 0x97,
+    0x19, 0x6a, 0x0b, 0x32,
+];
 
-    let mut state = AesState::new(plaintext);
-    state.encrypt(10, &round_keys);
-    let ciphertext = state.output();
-
-    let mut state2 = AesState::new(ciphertext);
-    state2.decrypt(10, &round_keys);
-    let decrypted = state2.output();
-
-    assert_eq!(decrypted, plaintext, "Decryption failed: {:?} != {:?}", decrypted, plaintext);
+#[test]
+fn aes_encrypts_correctly() {
+    let round_keys = key_schedule(&AES_KEY);
+    let mut state = AesState::new(PLAINTEXT);
+    state.encrypt(&round_keys);
+    assert_eq!(state.output(), CIPHERTEXT);
 }
 
-    #[test]
-fn test_encrypt_decrypt_case_2() {
-    let plaintext: [u8; 16] = [
-        0xde, 0xad, 0xbe, 0xef,
-        0xba, 0xad, 0xf0, 0x0d,
-        0xca, 0xfe, 0xba, 0xbe,
-        0x00, 0x11, 0x22, 0x33,
-    ];
-    let key: [u8; 16] = [
-        0x0f, 0x15, 0x71, 0xc9,
-        0x47, 0xd9, 0xe8, 0x59,
-        0x0c, 0xb7, 0xad, 0xd6,
-        0xaf, 0x7f, 0x67, 0x98,
-    ];
-
-    let round_keys = crate::key_schedule(&key, 10);
-    let mut state = crate::AesState::new(plaintext);
-    state.encrypt(10, &round_keys);
-    let ciphertext = state.output();
-
-    let mut decrypt_state = crate::AesState::new(ciphertext);
-    decrypt_state.decrypt(10, &round_keys);
-    let decrypted = decrypt_state.output();
-
-    assert_eq!(decrypted, plaintext, "Decryption did not yield original plaintext");
+#[test]
+fn aes_decrypts_correctly() {
+    let round_keys = key_schedule(&AES_KEY);
+    let mut state = AesState::new(CIPHERTEXT);
+    state.decrypt(&round_keys);
+    assert_eq!(state.output(), PLAINTEXT);
 }
 
+#[test]
+fn aes_roundtrip() {
+    let round_keys = key_schedule(&AES_KEY);
+    let mut state = AesState::new(PLAINTEXT);
+    state.encrypt(&round_keys);
+    state.decrypt(&round_keys);
+    assert_eq!(state.output(), PLAINTEXT);
 }

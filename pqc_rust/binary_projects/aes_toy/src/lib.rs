@@ -78,11 +78,7 @@ const AES_INV_MIX_COLUMNS: [u8; 16] = [
 
 
 impl AesState {
-    // pub fn new(input: [u8; 16], key: [u8; 16]) -> Self {
-    //     let state = xor_state(input, key);
-    //     Self { state }
-    // }
-    //this differs from new only in that it doesn't immediately xor with the key.
+    //Constructor, default state is input
     pub fn new(state: [u8; 16]) -> Self {
         Self { state }
     }
@@ -99,7 +95,7 @@ impl AesState {
         }
     }
         
-    pub fn shift_rows(&mut self) {
+    fn shift_rows(&mut self) {
         let mut temp = [0u8; 16]; // Initializes all entries to 0
         for i in 0..16 {
             temp[i] = self.state[4*(((i%4)+(i/4))%4)+(i%4)];
@@ -107,7 +103,7 @@ impl AesState {
         self.state = temp;
     }
 
-    pub fn inv_shift_rows(&mut self) {
+    fn inv_shift_rows(&mut self) {
         let mut temp = [0u8; 16]; // Initializes all entries to 0
         for i in 0..16 {
             temp[i] = self.state[4*(((i/4)+4-(i%4))%4)+(i%4)];
@@ -146,11 +142,14 @@ impl AesState {
             self.state[i] ^= round_key[i];
         }
  }
-    //Note: rounds is 1-indexed
-    pub fn encrypt(&mut self, rounds: usize, round_keys: &[ [u8; 16] ]) {
+    pub fn output(&self) -> [u8; 16] {
+        self.state
+    }
+
+    pub fn encrypt(&mut self, round_keys: &[[u8; 16];11]) {
         self.add_round_key(round_keys[0]);
 
-        for r in 1..rounds {
+        for r in 1..10 {
             self.sub_bytes();
             self.shift_rows();
             self.mix_columns();
@@ -158,18 +157,16 @@ impl AesState {
         }
         self.sub_bytes();
         self.shift_rows();
-        self.add_round_key(round_keys[rounds]);
+        self.add_round_key(round_keys[10]);
     }
 
-    pub fn output(&self) -> [u8; 16] {
-        self.state
-    }
+    
 
-    pub fn decrypt(&mut self, rounds: usize, round_keys: &[[u8; 16]]) {
-        self.add_round_key(round_keys[rounds]);
+    pub fn decrypt(&mut self, round_keys: &[[u8; 16];11]) {
+        self.add_round_key(round_keys[10]);
         self.inv_shift_rows();
         self.inv_sub_bytes();
-        for r in (1..rounds).rev() {
+        for r in (1..10).rev() {
             self.add_round_key(round_keys[r]);
             self.inv_mix_columns();
             self.inv_shift_rows();
@@ -180,9 +177,31 @@ impl AesState {
     }
 }
 
-pub fn key_schedule(key: &[u8; 16], num_rounds: usize) -> Vec<[u8; 16]> {
-    // For now, repeat the same key every round (insecure but simple)
-    vec![*key; num_rounds + 1] // one key for each round + initial
+pub fn key_schedule(key: &[u8; 16]) -> [[u8; 16];11] {
+    const RCON: [u8; 10] = [0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x1B, 0x36];
+    let mut round_keys: [[u8; 16]; 11] = [[0u8; 16]; 11];
+    let mut w: [[u8; 4]; 44] = [[0u8; 4]; 44];
+    for i in 0.. 4{
+        for j in 0..4 {
+            w[i][j]=key[4*i+j];
+        }
+    }
+    for i in 4..44 {
+        let mut temp = w[i - 1];
+        if i % 4 == 0 {
+            temp = sub_word(rot_word(temp));
+            temp[0] ^= RCON[i / 4 - 1];
+        }
+        for j in 0..4 {
+            w[i][j] = w[i - 4][j] ^ temp[j];
+        }
+    }
+    for i in 0..11{
+        for j in 0..16 {
+            round_keys[i][j] = w[4*i+j/4][j%4];
+        }
+    }
+    round_keys
 }
 
 
@@ -201,15 +220,6 @@ fn gmul2(b: u8) -> u8 {
     
 }
 
-//returns the index from the left of the msb of b. if b=0, returns 0 as well.
-// fn msb_index(b:u8) -> u8 {
-//     for i in 0..8 {
-//         if b<<i & 0x80 != 0 {
-//             return i;
-//         }
-//     }
-//     return 0;
-// }
 
 
 //multiplies the GF(2,8) version of a with x^k. Assume 0<= k <8
@@ -221,7 +231,7 @@ fn gmul_power2(b:u8, k:u8) -> u8 {
     result
 }
 
-fn gmul(a:u8, b:u8) -> u8 {
+pub fn gmul(a:u8, b:u8) -> u8 {
     let mut result:u8 = 0;
     for i in 0 .. 8 {
         if (a>>i)&1 != 0 {
@@ -241,4 +251,20 @@ fn gmatrix(m:[u8;16], v:[u8;4]) -> [u8;4] {
             }
     }
     result
+}
+
+fn rot_word(x:[u8;4]) -> [u8;4] {
+    let mut out:[u8;4] = [0u8;4];
+    for i in 0..4 {
+        out[i] = x[(i+1)%4];
+    }
+    out
+}
+
+fn sub_word(x:[u8;4]) -> [u8;4] {
+    let mut out:[u8;4] = [0u8;4];
+    for i in 0..4 {
+        out[i] = AES_SBOX[x[i] as usize];
+    }
+    out
 }
