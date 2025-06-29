@@ -12,7 +12,7 @@ pub fn merge_sort<T: Ord + Clone>(arr: &[T]) -> Vec<T> {
         merge(&sorted_left, &sorted_right)
 
 }
-//takes two sorted vectors and merges them into one larger sorted vector
+//takes t3qy5 wo sorted vectors and merges them into one larger sorted vector
 fn merge<T: Ord + Clone>(left: &[T], right: &[T]) -> Vec<T> {
     let mut out: Vec<T> = Vec::with_capacity(left.len() + right.len());
     let mut i:usize = 0;
@@ -30,8 +30,8 @@ fn merge<T: Ord + Clone>(left: &[T], right: &[T]) -> Vec<T> {
         }
     }
     // Append any remaining elements from left or right
-    out.extend_from_slice(&left[i..]);
-    out.extend_from_slice(&right[j..]);
+    if j==rlen {out.extend_from_slice(&left[i..]);}
+    if i == llen {out.extend_from_slice(&right[j..]);}
 
     out
 }
