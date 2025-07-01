@@ -1,5 +1,6 @@
 use aes_toy::{AesState, key_schedule};
 
+
 // 128-bit AES test key
 const AES_KEY: [u8; 16] = [
     0x2b, 0x7e, 0x15, 0x16,
@@ -27,7 +28,7 @@ const CIPHERTEXT: [u8; 16] = [
 #[test]
 fn aes_encrypts_correctly() {
     let round_keys = key_schedule(&AES_KEY);
-    let mut state = AesState::new(PLAINTEXT);
+    let mut state = AesState::new(&PLAINTEXT);
     state.encrypt(&round_keys);
     assert_eq!(state.output(), CIPHERTEXT);
 }
@@ -35,7 +36,7 @@ fn aes_encrypts_correctly() {
 #[test]
 fn aes_decrypts_correctly() {
     let round_keys = key_schedule(&AES_KEY);
-    let mut state = AesState::new(CIPHERTEXT);
+    let mut state = AesState::new(&CIPHERTEXT);
     state.decrypt(&round_keys);
     assert_eq!(state.output(), PLAINTEXT);
 }
@@ -43,7 +44,7 @@ fn aes_decrypts_correctly() {
 #[test]
 fn aes_roundtrip() {
     let round_keys = key_schedule(&AES_KEY);
-    let mut state = AesState::new(PLAINTEXT);
+    let mut state = AesState::new(&PLAINTEXT);
     state.encrypt(&round_keys);
     state.decrypt(&round_keys);
     assert_eq!(state.output(), PLAINTEXT);

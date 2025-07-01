@@ -1,3 +1,6 @@
+pub mod modes;
+pub use modes::{encrypt_cbc, decrypt_cbc, encrypt_ecb, decrypt_ecb};
+
 pub struct AesState {
     state: [u8; 16]
 }
@@ -79,8 +82,8 @@ const AES_INV_MIX_COLUMNS: [u8; 16] = [
 
 impl AesState {
     //Constructor, default state is input
-    pub fn new(state: [u8; 16]) -> Self {
-        Self { state }
+    pub fn new(s: &[u8; 16]) -> Self {
+        Self { state: *s }
     }
     // This replaces each byte of state with that byte (as a number:usize)'s index of AES_SBOX.
     fn sub_bytes(&mut self) {
