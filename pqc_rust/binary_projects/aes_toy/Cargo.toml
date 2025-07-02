@@ -6,6 +6,17 @@ edition = "2021"
 [dependencies]
 hex = "0.4"
 rand = "0.8"
+clap = { version = "4", features = ["derive"] }
 
 [lib]
 path = "src/lib.rs"
+
+[dev-dependencies]
+criterion = "0.5"
+
+[profile.bench]
+debug = true
+
+[[bench]]
+name = "aes_benchmark"
+harness = false

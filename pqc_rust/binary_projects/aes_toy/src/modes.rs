@@ -1,13 +1,6 @@
-use crate::{key_schedule, AesState};
+use crate::{AesState, key_schedule};
+use crate::utils::{pad16, unpad16, xor_blocks, DecryptionError};
 
-
-
-#[derive(Debug)]
-pub enum DecryptionError {
-    InvalidPadding,
-    InvalidLength,
-    // Add more variants as needed
-}
 
 pub fn encrypt_ecb(plaintext: &[u8], key: &[u8; 16]) -> Vec<u8> {
     let round_keys = key_schedule(key);
@@ -95,35 +88,5 @@ pub fn decrypt_cbc(ciphertext: &[u8], key: &[u8; 16], iv: [u8; 16]) -> Result<Ve
     unpad16(&output).ok_or(DecryptionError::InvalidPadding)
 
 
-}
-
-pub fn pad16(text: &[u8])-> Vec<u8> {
-    let k = 16 - (text.len() % 16);
-    let mut out:Vec<u8> = text.to_vec();
-    let padding = vec![k as u8; k];
-    out.extend_from_slice(&padding);
-    out
-}
-
-pub fn unpad16(text: &[u8])->Option<Vec<u8>> {
-    if let Some(&k) = text.last() {
-        if (1..=16).contains(&k) && text.len()>=k as usize {
-                let slice = &text[text.len()-k as usize..];
-                if slice.iter().all(|&x| x== k) {
-                    let unpad = &text[..text.len()-k as usize];
-                    return Some(unpad.to_vec());
-                }
-                
-        }
-    }
-    None
-}
-
-pub fn xor_blocks(a: &[u8; 16], b: &[u8; 16]) -> [u8; 16] {
-    let mut out:[u8;16] = [0;16];
-    for i in 0..16 {
-        out[i] = a[i]^ b[i];
-    }
-    out
 }
 
