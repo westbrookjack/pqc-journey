@@ -1,30 +1,34 @@
-use aes_mac_integration::{auth_encrypt, auth_decrypt};
+use aes_mac_integration::{auth_encrypt, SecureMessage};
 use aes_toy::{ECB, CBC};
 use mac_toy::PrefixMac;
 
 #[test]
-fn test_ecb_roundtrip() {
-    let key = [0u8; 16];
-    let plaintext = b"Example message in ECB mode.";
+fn test_ecb_prefix_mac() {
+    let key = [0x01; 16];
+    let plaintext = b"Secret message!";
+
     let mac = PrefixMac::new(&key);
     let ecb = ECB;
 
-    let secure = auth_encrypt(plaintext, &key, None, mac.clone(), &ecb);
-    let decrypted = auth_decrypt(&secure, &key, &mac, &ecb).expect("ECB decryption failed");
+    let secure: SecureMessage<_> = auth_encrypt(plaintext, &key, None, mac, &ecb);
+    assert!(secure.mac_is_valid());
 
+    let decrypted = secure.decrypt_with(&key, &ecb).expect("Decryption failed");
     assert_eq!(decrypted, plaintext);
 }
 
 #[test]
-fn test_cbc_roundtrip() {
-    let key = [1u8; 16];
-    let iv = [42u8; 16];
-    let plaintext = b"Example message in CBC mode.";
+fn test_cbc_prefix_mac() {
+    let key = [0x02; 16];
+    let iv = [0xAA; 16];
+    let plaintext = b"Another message!";
+
     let mac = PrefixMac::new(&key);
     let cbc = CBC;
 
-    let secure = auth_encrypt(plaintext, &key, Some(&iv), mac.clone(), &cbc);
-    let decrypted = auth_decrypt(&secure, &key, &mac, &cbc).expect("CBC decryption failed");
+    let secure: SecureMessage<_> = auth_encrypt(plaintext, &key, Some(&iv), mac, &cbc);
+    assert!(secure.mac_is_valid());
 
+    let decrypted = secure.decrypt_with(&key, &cbc).expect("Decryption failed");
     assert_eq!(decrypted, plaintext);
 }

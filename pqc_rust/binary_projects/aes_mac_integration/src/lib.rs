@@ -9,6 +9,47 @@ pub struct SecureMessage<M> {
     pub mac_mode: M,
 }
 
+impl<M: MacModeImpl> SecureMessage<M> {
+    pub fn mac_is_valid(&self) -> bool {
+    if let Ok(tag_array) = self.mac_tag.as_slice().try_into() {
+        self.mac_mode.verify(&self.ciphertext, tag_array)
+    } else {
+        false
+    }
+}
+
+
+    pub fn decrypt_with<D: AesDecryptor>(
+        &self,
+        key: &[u8; 16],
+        decryptor: &D,
+    ) -> Result<Vec<u8>, AuthError> {
+        if !self.mac_is_valid() {
+            return Err(AuthError::MacVerificationFailed);
+        }
+
+        decryptor
+            .decrypt(&self.ciphertext, key, self.iv.as_ref())
+            .map_err(AuthError::DecryptionFailed)
+    }
+
+    
+}
+
+impl<M: MacModeImpl> std::fmt::Debug for SecureMessage<M> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "SecureMessage {{ ciphertext: {:02x?}, mac_tag: {:02x?}, iv: {:?} }}",
+            self.ciphertext,
+            self.mac_tag,
+            self.iv
+        )
+    }
+}
+
+
+
 #[derive(Debug)]
 pub enum AuthError {
     MacVerificationFailed,
@@ -26,7 +67,7 @@ pub enum AuthError {
 ///
 /// Returns a `SecureMessage` containing the ciphertext, MAC tag, IV, and MAC.
 
-pub fn auth_encrypt<M, E>(
+pub fn encrypt_authenticated<M, E>(
     plaintext: &[u8],
     key: &[u8; 16],
     iv: Option<&[u8; 16]>,
@@ -48,26 +89,3 @@ where
     }
 }
 
-
-pub fn auth_decrypt<M, D>(
-    message: &SecureMessage<M>,
-    key: &[u8; 16],
-    mac: &M,
-    decryptor: &D,
-) -> Result<Vec<u8>, AuthError>
-where
-    M: MacModeImpl,
-    D: AesDecryptor,
-{
-    let tag_array: &[u8; 16] = message.mac_tag.as_slice()
-        .try_into()
-        .map_err(|_| AuthError::MacVerificationFailed)?;
-
-    if !mac.verify(&message.ciphertext, tag_array) {
-        return Err(AuthError::MacVerificationFailed);
-    }
-
-    decryptor
-        .decrypt(&message.ciphertext, key, message.iv.as_ref())
-        .map_err(AuthError::DecryptionFailed)
-}
