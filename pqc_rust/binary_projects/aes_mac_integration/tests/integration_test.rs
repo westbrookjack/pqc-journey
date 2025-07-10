@@ -1,4 +1,4 @@
-use aes_mac_integration::{auth_encrypt, SecureMessage};
+use aes_mac_integration::{encrypt_authenticated, SecureMessage};
 use aes_toy::{ECB, CBC};
 use mac_toy::PrefixMac;
 
@@ -10,7 +10,7 @@ fn test_ecb_prefix_mac() {
     let mac = PrefixMac::new(&key);
     let ecb = ECB;
 
-    let secure: SecureMessage<_> = auth_encrypt(plaintext, &key, None, mac, &ecb);
+    let secure: SecureMessage<_> = encrypt_authenticated(plaintext, &key, None, mac, &ecb);
     assert!(secure.mac_is_valid());
 
     let decrypted = secure.decrypt_with(&key, &ecb).expect("Decryption failed");
@@ -26,7 +26,7 @@ fn test_cbc_prefix_mac() {
     let mac = PrefixMac::new(&key);
     let cbc = CBC;
 
-    let secure: SecureMessage<_> = auth_encrypt(plaintext, &key, Some(&iv), mac, &cbc);
+    let secure: SecureMessage<_> = encrypt_authenticated(plaintext, &key, Some(&iv), mac, &cbc);
     assert!(secure.mac_is_valid());
 
     let decrypted = secure.decrypt_with(&key, &cbc).expect("Decryption failed");
