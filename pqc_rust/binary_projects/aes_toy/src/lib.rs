@@ -8,7 +8,7 @@ pub mod utils;
 pub use aes_state::AesState;
 pub use key_schedule::key_schedule;
 
-pub use traits::{AesEncryptor, AesDecryptor};
+pub use traits::AesMode;
 pub use utils::generate_random_iv;
 pub use cbc::CBC;
 pub use ecb::ECB;

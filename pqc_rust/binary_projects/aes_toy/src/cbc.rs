@@ -1,10 +1,10 @@
 use crate::{AesState, key_schedule, DecryptionError};
 use crate::utils::{pad16, unpad16, xor_blocks, generate_random_iv};
-use crate::traits::{AesEncryptor, AesDecryptor};
+use crate::traits::AesMode;
 
 pub struct CBC;
 
-impl AesEncryptor for CBC {
+impl AesMode for CBC {
     fn encrypt(&self, plaintext: &[u8], key: &[u8; 16], iv: Option<&[u8; 16]>) -> (Vec<u8>, Option<[u8; 16]>) {
         let actual_iv = iv.copied().unwrap_or_else(generate_random_iv);
         let round_keys = key_schedule(key);
@@ -24,10 +24,7 @@ impl AesEncryptor for CBC {
 
         (output, Some(actual_iv))
     }
-}
 
-
-impl AesDecryptor for CBC {
     fn decrypt(&self, ciphertext: &[u8], key: &[u8; 16], iv: Option<&[u8; 16]>) -> Result<Vec<u8>, DecryptionError> {
         let iv = iv.ok_or(DecryptionError::InvalidLength)?;
         let round_keys = key_schedule(key);
