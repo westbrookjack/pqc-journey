@@ -1,8 +1,10 @@
 use sha2::{Sha256, Digest};
 use crate::traits::MacModeImpl;
+use serde::{Serialize, Deserialize};
 
 
-#[derive(Clone)]
+
+#[derive(Clone, Serialize, Deserialize)]
 pub struct PrefixMac {
     key: [u8; 16],
 }
