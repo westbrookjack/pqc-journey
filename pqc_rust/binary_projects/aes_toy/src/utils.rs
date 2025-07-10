@@ -1,3 +1,5 @@
+use rand::Rng;
+
 pub fn pad16(text: &[u8])-> Vec<u8> {
     let k = 16 - (text.len() % 16);
     let mut out:Vec<u8> = text.to_vec();
@@ -168,9 +170,8 @@ pub fn sub_word(x:[u8;4]) -> [u8;4] {
     out
 }
 
-#[derive(Debug)]
-pub enum DecryptionError {
-    InvalidPadding,
-    InvalidLength,
-    // Add more variants as needed
+pub fn generate_random_iv() -> [u8; 16] {
+    let mut iv = [0u8; 16];
+    rand::thread_rng().fill(&mut iv);
+    iv
 }

@@ -1,0 +1,9 @@
+[package]
+name = "aes_mac_integration"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+aes_toy = { path = "../aes_toy" }
+mac_toy = { path = "../mac_toy" }
+
