@@ -42,4 +42,16 @@ impl MacModeImpl for PrefixMac {
     fn verify(&self, message: &[u8], tag: &[u8; 16]) -> bool {
         self.verify(message, tag)
     }
+
+    fn name(&self) -> &'static str {
+        "prefix"
+    }
 }
+
+impl Default for PrefixMac {
+    fn default() -> Self {
+        let default_key = [0u8; 16];
+        PrefixMac::new(&default_key)
+    }
+}
+

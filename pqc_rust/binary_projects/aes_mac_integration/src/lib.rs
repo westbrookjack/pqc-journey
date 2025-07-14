@@ -8,8 +8,14 @@ pub struct SecureMessage<M> {
     pub ciphertext: Vec<u8>,
     pub mac_tag: Vec<u8>,
     pub iv: Option<[u8; 16]>,
+
+    #[serde(skip, default)]
     pub mac_mode: M,
+
+
+    pub mac_mode_name: String,
 }
+
 
 impl<M: MacModeImpl> SecureMessage<M> {
     pub fn mac_is_valid(&self) -> bool {
@@ -25,6 +31,12 @@ impl<M: MacModeImpl> SecureMessage<M> {
     key: &[u8; 16],
     cipher: &dyn AesMode, 
 ) -> Result<Vec<u8>, AuthError> {
+        if self.mac_mode.name()!= self.mac_mode_name {
+            return Err(AuthError::MacNameMismatch{
+                expected: self.mac_mode.name().to_string(),
+                actual: self.mac_mode_name.clone(),
+            });
+        }
         if !self.mac_is_valid() {
             return Err(AuthError::MacVerificationFailed);
         }
@@ -52,27 +64,30 @@ pub enum AuthError {
     MacVerificationFailed,
     DecryptionFailed(aes_toy::DecryptionError),
     MissingIV,
+    MacNameMismatch {
+        expected: String, actual: String
+    }
 }
 
 /// Encrypts a message using the provided AES mode and computes a MAC.
-pub fn auth_encrypt<M>(
+pub fn auth_encrypt<M: MacModeImpl + Clone>(
     plaintext: &[u8],
     key: &[u8; 16],
     iv: Option<&[u8; 16]>,
     mac: M,
     cipher: &dyn AesMode, // <- trait object
 ) -> SecureMessage<M>
-where
-    M: MacModeImpl + Clone,
 {
     let (ciphertext, actual_iv) = cipher.encrypt(plaintext, key, iv);
     let tag = mac.compute(&ciphertext);
+    let mac_mode_name=mac.name().to_string();
 
     SecureMessage {
         ciphertext,
         mac_tag: tag.to_vec(),
         iv: actual_iv,
         mac_mode: mac,
+        mac_mode_name,
     }
 }
 
