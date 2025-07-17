@@ -12,5 +12,5 @@ pub fn derive_key(master_key: &[u8], salt: Option<&[u8]>, info: &[u8], out_len: 
 }
 
 pub fn derive_keys_for_secure_message(master_key: &[u8], salt: Option<&[u8]>, info: &[u8], out_len: usize) -> (Vec<u8>, Vec<u8>){
-
+    
 }
