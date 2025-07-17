@@ -1,11 +1,12 @@
 use crate::{AesState, key_schedule, DecryptionError};
 use crate::utils::{pad16, unpad16};
-use crate::traits::AesMode;
+use crate::traits::CipherMode;
 
-pub struct ECB;
+#[derive(Clone)]
+pub struct Ecb;
 
-impl AesMode for ECB {
-    fn encrypt(&self, plaintext: &[u8], key: &[u8; 16], _iv: Option<&[u8; 16]>) -> (Vec<u8>, Option<[u8; 16]>) {
+impl CipherMode for Ecb {
+    fn encrypt(&self, key: &[u8; 16],  _iv: Option<&[u8; 16]>, plaintext: &[u8]) -> (Vec<u8>, Option<[u8; 16]>) {
         let round_keys = key_schedule(key);
         let padded = pad16(plaintext);
         let mut output = Vec::with_capacity(padded.len());
@@ -20,7 +21,7 @@ impl AesMode for ECB {
         (output, None)
     }
 
-    fn decrypt(&self, ciphertext: &[u8], key: &[u8; 16], _iv: Option<&[u8; 16]>) -> Result<Vec<u8>, DecryptionError> {
+    fn decrypt(&self, key: &[u8; 16], _iv: Option<&[u8; 16]>,ciphertext: &[u8]) -> Result<Vec<u8>, DecryptionError> {
         let round_keys = key_schedule(key);
         let mut output = Vec::with_capacity(ciphertext.len());
 
@@ -36,5 +37,15 @@ impl AesMode for ECB {
         }
 
         unpad16(&output).ok_or(DecryptionError::InvalidPadding)
+    }
+
+    fn name (&self) -> &'static str {
+        "ecb"
+    }
+}
+
+impl Default for Ecb {
+    fn default()->Self {
+        Ecb
     }
 }

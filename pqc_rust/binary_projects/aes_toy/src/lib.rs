@@ -6,16 +6,29 @@ pub mod ecb;
 pub mod utils;
 
 pub use aes_state::AesState;
+pub use cbc::Cbc;
+pub use ecb::Ecb;
 pub use key_schedule::key_schedule;
-
-pub use traits::AesMode;
+use std::fmt;
+pub use traits::{CipherMode, CipherModeImpl};
 pub use utils::generate_random_iv;
-pub use cbc::CBC;
-pub use ecb::ECB;
 
-#[derive(Debug)]
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum DecryptionError {
     InvalidPadding,
     MissingIV,
     InvalidLength,
 }
+
+impl fmt::Display for DecryptionError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::InvalidPadding => write!(f, "Invalid padding"),
+            Self::MissingIV => write!(f, "Missing IV"),
+            Self::InvalidLength => write!(f, "Invalid length"),
+        }
+    }
+}
+
+impl std::error::Error for DecryptionError {}

@@ -35,11 +35,11 @@ pub fn xor_blocks(a: &[u8; 16], b: &[u8; 16]) -> [u8; 16] {
 // and where the i-th letter from the left is identified with that value times x^i. Thus 3 = 00000011 is identified with x+1--similarly 2 is identified with x
 
 //This function takes a byte, identifies it with an element of GF(2,8), multiplies that result by x, and returns that result converted back to a byte.
-fn gmul2(b: u8) -> u8 {
-    let shifted = b << 1;
+fn gmul2(x: u8) -> u8 {
+    let shifted = x << 1;
     //This part of the code checks if b and 10000000 is equal to 1, i.e. if the msb of b is 1. If yes, we will get an x^8 in the product, which reduces to x^4+x^3+x+1, identified with 27=0xb1,
     //which we must add, modulo 2, which is why we XOR with 27
-    if b & 0x80 != 0 {
+    if x & 0x80 != 0 {
         return shifted ^ 0x1b;
     }
     return shifted;
@@ -49,31 +49,31 @@ fn gmul2(b: u8) -> u8 {
 
 
 //multiplies the GF(2,8) version of a with x^k. Assume 0<= k <8
-fn gmul_power2(b:u8, k:u8) -> u8 {
-    let mut result:u8 = b;
+fn gmul_power2(x:u8, k:u8) -> u8 {
+    let mut result:u8 = x;
     for _i in 0..k {
         result = gmul2(result);
     }
     result
 }
 
-fn gmul(a:u8, b:u8) -> u8 {
+fn gmul(x:u8, y:u8) -> u8 {
     let mut result:u8 = 0;
     for i in 0 .. 8 {
-        if (a>>i)&1 != 0 {
-            result ^= gmul_power2(b,i);
+        if (x>>i)&1 != 0 {
+            result ^= gmul_power2(y,i);
         }
     }
     result
 }
 
 //assume the matrix fills rows first (as opposed to columns first)
-pub fn gmatrix(m:[u8;16], v:[u8;4]) -> [u8;4] {
+pub fn gmatrix(matrix:[u8;16], column:[u8;4]) -> [u8;4] {
     let mut result = [0u8; 4]; // Initializes all entries to 0
 
     for i in 0.. 4 {
             for j in 0.. 4 {
-                result[i] ^= gmul(m[4*i+j],v[j]);
+                result[i] ^= gmul(matrix[4*i+j],column[j]);
             }
     }
     result

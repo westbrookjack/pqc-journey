@@ -1,12 +1,9 @@
 use crate::utils::{gmatrix,AES_SBOX, AES_INV_SBOX, AES_MIX_COLUMNS, AES_INV_MIX_COLUMNS};
 
+#[derive(Clone, Copy)]
 pub struct AesState {
     state: [u8; 16]
 }
-
-
-
-
 
 impl AesState {
     //Constructor, default state is input
@@ -107,4 +104,3 @@ impl AesState {
         self.add_round_key(round_keys[0]);
     }
 }
-

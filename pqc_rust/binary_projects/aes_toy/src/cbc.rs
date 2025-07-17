@@ -1,11 +1,12 @@
 use crate::{AesState, key_schedule, DecryptionError};
 use crate::utils::{pad16, unpad16, xor_blocks, generate_random_iv};
-use crate::traits::AesMode;
+use crate::traits::CipherMode;
 
-pub struct CBC;
+#[derive(Clone)]
+pub struct Cbc;
 
-impl AesMode for CBC {
-    fn encrypt(&self, plaintext: &[u8], key: &[u8; 16], iv: Option<&[u8; 16]>) -> (Vec<u8>, Option<[u8; 16]>) {
+impl CipherMode for Cbc {
+    fn encrypt(&self, key: &[u8; 16], iv: Option<&[u8; 16]>, plaintext: &[u8]) -> (Vec<u8>, Option<[u8; 16]>) {
         let actual_iv = iv.copied().unwrap_or_else(generate_random_iv);
         let round_keys = key_schedule(key);
         let padded = pad16(plaintext);
@@ -25,7 +26,7 @@ impl AesMode for CBC {
         (output, Some(actual_iv))
     }
 
-    fn decrypt(&self, ciphertext: &[u8], key: &[u8; 16], iv: Option<&[u8; 16]>) -> Result<Vec<u8>, DecryptionError> {
+    fn decrypt(&self,  key: &[u8; 16], iv: Option<&[u8; 16]>, ciphertext: &[u8]) -> Result<Vec<u8>, DecryptionError> {
         let iv = iv.ok_or(DecryptionError::InvalidLength)?;
         let round_keys = key_schedule(key);
         let mut output = Vec::with_capacity(ciphertext.len());
@@ -46,5 +47,15 @@ impl AesMode for CBC {
         }
 
         unpad16(&output).ok_or(DecryptionError::InvalidPadding)
+    }
+
+    fn name(&self) -> &'static str {
+        "cbc"
+    }
+}
+
+impl Default for Cbc {
+    fn default() -> Self {
+        Cbc
     }
 }

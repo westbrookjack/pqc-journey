@@ -1,23 +1,17 @@
 use sha2::{Sha256, Digest};
-use crate::traits::MacModeImpl;
+use crate::traits:: MacMode;
 use serde::{Serialize, Deserialize};
 
 
 
 #[derive(Clone, Serialize, Deserialize)]
-pub struct PrefixMac {
-    key: [u8; 16],
-}
+pub struct PrefixMac;
 
 
 impl PrefixMac {
-    pub fn new(key: &[u8; 16]) -> Self {
-        Self { key: *key }
-    }
-
-    pub fn compute(&self, m: &[u8]) -> [u8; 16] {
+    pub fn compute(&self, k:&[u8;16], m: &[u8]) -> [u8; 16] {
         let mut hasher = Sha256::new();
-        hasher.update(&self.key);
+        hasher.update(k);
         hasher.update(m);
         let result = hasher.finalize();
         let mut tag = [0u8; 16];
@@ -25,22 +19,18 @@ impl PrefixMac {
         tag
     }
 
-    pub fn verify(&self, m: &[u8], t: &[u8; 16]) -> bool {
-        self.compute(m) == *t
+    pub fn verify(&self,k:&[u8;16], m: &[u8], t: &[u8; 16]) -> bool {
+        self.compute(k, m) == *t
     }
 }
 
-impl MacModeImpl for PrefixMac {
-    fn new(key: &[u8; 16]) -> Self {
-        PrefixMac::new(key)
+impl MacMode for PrefixMac {
+    fn compute(&self, key:&[u8;16], message: &[u8] ) -> [u8; 16] {
+        self.compute(key, message)
     }
 
-    fn compute(&self, message: &[u8]) -> [u8; 16] {
-        self.compute(message)
-    }
-
-    fn verify(&self, message: &[u8], tag: &[u8; 16]) -> bool {
-        self.verify(message, tag)
+    fn verify(&self,key:&[u8;16], message: &[u8], tag: &[u8; 16]) -> bool {
+        self.verify(key, message, tag)
     }
 
     fn name(&self) -> &'static str {
@@ -50,8 +40,6 @@ impl MacModeImpl for PrefixMac {
 
 impl Default for PrefixMac {
     fn default() -> Self {
-        let default_key = [0u8; 16];
-        PrefixMac::new(&default_key)
+        PrefixMac
     }
 }
-
